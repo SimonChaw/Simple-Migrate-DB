@@ -27,7 +27,7 @@ class SMDB_DB_Handler {
 	 * @since   1.0
 	 */
 	public function __construct() {
-    $this->tables = array();
+    $this->tables= array();
   }
 
   /**
@@ -43,10 +43,12 @@ class SMDB_DB_Handler {
 
       foreach($results as $index => $value) {
           foreach($value as $table_name) {
-              array_push($this->tables, $table_name );
+            $table = new SMDB_Table;
+            $table->name = $table_name;
+            array_push($this->tables, $table);
           }
       }
-      var_dump($this->tables);
+      $this->get_all_data();
   }
 
   /**
@@ -56,7 +58,14 @@ class SMDB_DB_Handler {
    * @since   1.0
    */
   public function get_all_data() {
-
+    global $wpdb;
+    foreach ($this->tables as $key => $table) {
+      $table->columns = $wpdb->get_col("DESC {$table->name}", 0);
+      $rows = $wpdb->get_results("SELECT * FROM " . $table->name);
+      foreach ($rows as $row_key => $row) {
+        array_push($table->rows, $row);
+      }
+    }
   }
 
 }
