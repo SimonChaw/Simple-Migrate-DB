@@ -121,6 +121,8 @@ final class Simple_Migrate_DB {
 	private function includes() {
     //PLUGIN_DIR . 'includes/install.php';
     //ADMIN
+		require_once SMDB_PLUGIN_DIR . 'includes/actions.php';
+		require_once SMDB_PLUGIN_DIR . 'includes/scripts.php';
     require_once SMDB_PLUGIN_DIR . 'includes/admin/admin_page.php';
 		//DATABASE
 		require_once SMDB_PLUGIN_DIR . 'includes/smdb-table-class.php';

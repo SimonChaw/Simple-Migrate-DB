@@ -27,7 +27,7 @@ class SMDB_DB_Handler {
 	 * @since   1.0
 	 */
 	public function __construct() {
-    $this->tables= array();
+    $this->tables = array();
   }
 
   /**
@@ -48,24 +48,39 @@ class SMDB_DB_Handler {
             array_push($this->tables, $table);
           }
       }
-      $this->get_all_data();
+
   }
 
   /**
+   * Rewrite $tables->names based on what the user has selected
+   *
+   * @access  public
+   * @since   1.0
+   */
+   public function set_table_names( $req_tables ){
+      $this->tables = array();
+      foreach ($req_tables as $key => $req_table) {
+        $table = new SMDB_Table;
+        $table->name = $req_table['name'];
+        array_push($this->tables, $table);
+      }
+   }
+
+  /**
    * Get all of the data for each table;
-   *  $this->table['name']['row']['column_value'] = result['column_value']
+   *
    * @access  public
    * @since   1.0
    */
   public function get_all_data() {
-    global $wpdb;
-    foreach ($this->tables as $key => $table) {
-      $table->columns = $wpdb->get_col("DESC {$table->name}", 0);
-      $rows = $wpdb->get_results("SELECT * FROM " . $table->name);
-      foreach ($rows as $row_key => $row) {
-        array_push($table->rows, $row);
+      global $wpdb;
+      foreach ($this->tables as $key => $table) {
+        $table->columns = $wpdb->get_col("DESC {$table->name}", 0);
+        $rows = $wpdb->get_results("SELECT * FROM " . $table->name);
+        foreach ($rows as $row_key => $row) {
+          array_push($table->rows, $row);
+        }
       }
-    }
   }
 
 }
