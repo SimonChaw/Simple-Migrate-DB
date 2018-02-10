@@ -18,9 +18,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with Easy Digital Downloads. If not, see <http://www.gnu.org/licenses/>.
- *
  * @package SMDB
  * @category Core
  * @author Simon Chawla
@@ -44,20 +41,22 @@ final class Simple_Migrate_DB {
 	private static $instance;
 
   /**
-	 * SMDB API Object.
-	 *
-	 * @var object|SMDB_API
-	 * @since 1.0
-	 */
-  public $api;
-
-  /**
 	 * SMDB Database Handler Object.
 	 *
 	 * @var object|SMDB_DB_Handler
 	 * @since 1.0
 	 */
   public $dbhandler;
+
+	/**
+	 * SMDB HTML Session Object.
+	 *
+	 * For holding transfered DB
+	 *
+	 * @var object|SMDB_Session
+	 * @since 1.5
+	 */
+	public $session;
 
   /**
 	 * Main Simple_Migrate_DB Instance.
@@ -68,18 +67,14 @@ final class Simple_Migrate_DB {
 	 * @since 1.0
 	 * @static
 	 * @staticvar array $instance
-	 * @uses Easy_Digital_Downloads::setup_constants() Setup the constants needed.
-	 * @uses Easy_Digital_Downloads::includes() Include the required files.
-	 * @uses Easy_Digital_Downloads::load_textdomain() load the language files.
-	 * @see EDD()
-	 * @return object|Easy_Digital_Downloads The one true Easy_Digital_Downloads
+	 * @uses Simple_Migrate_DB::includes() Include the required files.
+	 * @return object|Simple_Migrate_DB
 	 */
 	public static function instance() {
       if ( ! isset( self::$instance ) && ! ( self::$instance instanceof Simple_Migrate_DB ) ) {
   			self::$instance = new Simple_Migrate_DB;
   			self::$instance->setup_constants();
   			self::$instance->includes();
-  			//self::$instance->api           = new SMDB_API();
   			self::$instance->dbhandler     = new SMDB_DB_Handler();
   		}
 	    return self::$instance;
@@ -120,6 +115,8 @@ final class Simple_Migrate_DB {
 	 */
 	private function includes() {
     //PLUGIN_DIR . 'includes/install.php';
+		//API
+		require_once SMDB_PLUGIN_DIR . 'includes/api/smdb-api.php';
     //ADMIN
 		require_once SMDB_PLUGIN_DIR . 'includes/actions.php';
 		require_once SMDB_PLUGIN_DIR . 'includes/scripts.php';

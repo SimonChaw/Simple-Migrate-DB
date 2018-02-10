@@ -15,7 +15,8 @@ jQuery(document).ready(function ($) {
         '(\\?[;&a-z\\d%@_.,~+&:=-]*)?'+ // query string
         '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
         return pattern.test(str);
-      }
+      },
+      url : ''
     },
 
     init : function() {
@@ -25,34 +26,40 @@ jQuery(document).ready(function ($) {
 
     //Functions for selecting which tables will be migrated
     request_tables : function() {
-        //Request a list of tables for this wordpress site
-        $( document.body ).on( 'click', '#btn-start', function( e ) {
-                if (Simple_Migrate_DB.vars.btn_disabled === false) {
-                  e.preventDefault();
-                  $( '.spinner' ).css('visibility', 'visible');
+        //Request a list of tables for the old wordpress site
+        $( document.body ).on( 'click', '#btn-request', function( e ) {
+                e.preventDefault();
 
-                  var data = {
-                      action: 'request_tables',
-                  };
+                var site = $( '#txt-site' ).val();
 
-                  $.get(ajaxurl, data, function(response){
-                    if (response.success === true) {
-                      Simple_Migrate_DB.vars.all_tables =  response.tables;
-                      Simple_Migrate_DB.vars.btn_disabled = true;
-                      $( '.spinner' ).css('visibility', 'hidden');
-                      $( '#btn-start' ).toggleClass('button-primary', false);
-                      $( '#btn-start' ).toggleClass('button-disabled');
-                      $( '#selection' ).slideDown();
-                      for (var i = 0; i < response.tables.length; i++) {
-                        $( '#tbl-list' ).append('<tr>');
-                        $( '#tbl-list' ).append('<td><input id="cb-select-' + i + '" value="' + response.tables[i].name + '" type="checkbox"></td>');
-                        $( '#tbl-list' ).append('<td>' + response.tables[i].name  + '</td>');
-                        $( '#tbl-list' ).append('</tr>');
-                      }
-                    }
-                  });
+                if (Simple_Migrate_DB.vars.is_valid_url(site)) {
+                  console.log('accepted!');
+                  Simple_Migrate_DB.vars.url = site;
+                } else {
+                  $('#smdb-1-warnings').html('<br /><div class="notice notice-error is-dismissible"><p><strong>Error: Please enter a valid url.</strong></p></div>');
+                  return;
                 }
 
+                var postData = {
+                    action : 'request_tables',
+                    url : site
+                };
+
+                $.post(ajaxurl, postData, function(response){
+                  if (response.success === true) {
+                    console.log(response);
+                    Simple_Migrate_DB.vars.all_tables =  response.tables;
+                    $('#smdb-1').hide();
+                    $('#smdb-2').show();
+                    $( '#selection' ).slideDown();
+                    for (var i = 0; i < response.tables.length; i++) {
+                      $( '#tbl-list' ).append('<tr>');
+                      $( '#tbl-list' ).append('<td><input id="cb-select-' + i + '" value="' + response.tables[i].name + '" type="checkbox"></td>');
+                      $( '#tbl-list' ).append('<td>' + response.tables[i].name  + '</td>');
+                      $( '#tbl-list' ).append('</tr>');
+                    }
+                  }
+                }, 'json');
         });
         //Determine what tables will be migrated
         $( document.body ).on( 'click', '[type=checkbox]', function( e ) {
@@ -70,39 +77,32 @@ jQuery(document).ready(function ($) {
                     Simple_Migrate_DB.vars.requested_tables = e.target.checked ? Simple_Migrate_DB.vars.all_tables : [];
                 }
         });
+
         //Confirm table choices.
         $( document.body ).on( 'click', '#btn-finish-tables', function( e ) {
                 e.preventDefault();
                 if (Simple_Migrate_DB.vars.requested_tables.length > 0) {
-                    $( '#smdb-1' ).hide();
-                    $( '#smdb-2' ).show();
+
                 }
         });
     },
 
     migrate_db : function() {
-        $( document.body ).on( 'click', '#btn-send', function( e ) {
-                e.preventDefault();
+        $( document.body ).on( 'click', '#btn-finish-tables', function( e ) {
+                if (Simple_Migrate_DB.vars.requested_tables.length > 0) {
+                    e.preventDefault();
 
-                var site = $( '#txt-site' ).val();
+                    var postData = {
+                        action : 'migrate_db',
+                        url : Simple_Migrate_DB.vars.url,
+                        tables : Simple_Migrate_DB.vars.requested_tables
+                    };
 
-                if (Simple_Migrate_DB.vars.is_valid_url(site)) {
-                  console.log('accepted!');
-                } else {
-                  $('#smdb-2-warnings').html('<br /><div class="notice notice-error is-dismissible"><p><strong>Error: Please enter a valid url.</strong></p></div>');
-                  return;
+                    $.post(ajaxurl, postData, function(response){
+                        console.log(response);
+
+                    }, 'json');
                 }
-
-                var postData = {
-                    action : 'migrate_db',
-                    url : site,
-                    tables : Simple_Migrate_DB.vars.requested_tables
-                };
-
-                $.post(ajaxurl, postData, function(response){
-                    console.log(response);
-
-                }, 'json');
         });
     },
 

@@ -61,7 +61,7 @@ class SMDB_DB_Handler {
       $this->tables = array();
       foreach ($req_tables as $key => $req_table) {
         $table = new SMDB_Table;
-        $table->name = $req_table['name'];
+        $table->name = $req_table;
         array_push($this->tables, $table);
       }
    }
@@ -81,6 +81,54 @@ class SMDB_DB_Handler {
           array_push($table->rows, $row);
         }
       }
+  }
+  public function get_test_table()
+  {
+      global $wpdb;
+      $table = new SMDB_Table;
+      $table->name = 'wp_users';
+      $table->columns = $wpdb->get_col("DESC {$table->name}", 0);
+      $rows = $wpdb->get_results("SELECT * FROM " . $table->name);
+      foreach ($rows as $row_key => $row) {
+        array_push($table->rows, $row);
+      }
+      return $table;
+  }
+  /**
+   * Overwrite tables with data from the old site.
+   *
+   * @access  public
+   * @since   1.0
+   */
+  public function migrate( $tables ) {
+      global $wpdb;
+      foreach ($tables as $key => $table) {
+          //First delete all data in this table
+          //$wpdb->query("TRUNCATE TABLE {$table->name}");
+          //Now Insert the data from the old site for this table
+          $sql = "INSERT INTO {$table->name} (";
+          //Prepare columns
+          $col_length = count($table->columns);
+          $i = 0;
+          foreach ($table->columns as $column_key => $column) {
+              $i ++;
+              if ($i === $col_length) {
+                $sql = $sql . $column;
+              } else {
+                $sql = $sql . $column . ', ';
+              }
+          }
+          $sql = $sql . ') VALUES' ;
+          foreach ($table->rows as $row_key => $row) {
+              $i = 0;
+              $sql = $sql . '(' ;
+              foreach ($table->columns as $column_key => $column) {
+                  $sql = $sql . $row->column;
+              }
+              $sql = $sql . '),' ;
+          }
+      }
+      return $sql;
   }
 
 }
