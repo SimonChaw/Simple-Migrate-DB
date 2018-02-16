@@ -48,15 +48,17 @@ jQuery(document).ready(function ($) {
                 $.post(ajaxurl, postData, function(response){
                   if (response.success === true) {
                     console.log(response);
-                    Simple_Migrate_DB.vars.all_tables =  response.tables;
                     $('#smdb-1').hide();
                     $('#smdb-2').show();
                     $( '#selection' ).slideDown();
                     for (var i = 0; i < response.tables.length; i++) {
-                      $( '#tbl-list' ).append('<tr>');
-                      $( '#tbl-list' ).append('<td><input id="cb-select-' + i + '" value="' + response.tables[i].name + '" type="checkbox"></td>');
-                      $( '#tbl-list' ).append('<td>' + response.tables[i].name  + '</td>');
-                      $( '#tbl-list' ).append('</tr>');
+                      if (response.tables[i].name !== 'wp_users' && response.tables[i].name !== 'wp_options' && response.tables[i].name !== 'wp_usermeta') {
+                        $( '#tbl-list' ).append('<tr>');
+                        $( '#tbl-list' ).append('<td><input id="cb-select-' + i + '" value="' + response.tables[i].name + '" type="checkbox"></td>');
+                        $( '#tbl-list' ).append('<td>' + response.tables[i].name  + '</td>');
+                        $( '#tbl-list' ).append('</tr>');
+                        Simple_Migrate_DB.vars.all_tables.push(response.tables[i].name);
+                      }
                     }
                   }
                 }, 'json');

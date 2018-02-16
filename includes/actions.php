@@ -78,10 +78,9 @@ function migrate_db() {
             $context  = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
 
-            $output['result'] = json_decode($result);
-
-            $output['sql'] = SMDB()->dbhandler->migrate();
-        
+            $result = json_decode($result);
+            $output['tables'] = $result->tables;
+            $output['errors'] = SMDB()->dbhandler->migrate($result->tables);
         }
 
 

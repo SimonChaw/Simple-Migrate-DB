@@ -11,11 +11,6 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 function render_admin_view(){
-  $table = SMDB()->dbhandler->get_test_table();
-  $tables = array();
-  array_push($tables, $table);
-  var_dump($tables);
-  echo SMDB()->dbhandler->migrate($tables);
   ?>
   <div class="wrap">
     <h1>Simple Database Migration</h1>

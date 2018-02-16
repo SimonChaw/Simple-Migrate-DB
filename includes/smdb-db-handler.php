@@ -86,7 +86,7 @@ class SMDB_DB_Handler {
   {
       global $wpdb;
       $table = new SMDB_Table;
-      $table->name = 'wp_users';
+      $table->name = 'wp_posts';
       $table->columns = $wpdb->get_col("DESC {$table->name}", 0);
       $rows = $wpdb->get_results("SELECT * FROM " . $table->name);
       foreach ($rows as $row_key => $row) {
@@ -102,33 +102,53 @@ class SMDB_DB_Handler {
    */
   public function migrate( $tables ) {
       global $wpdb;
+      $errors = array();
       foreach ($tables as $key => $table) {
-          //First delete all data in this table
-          //$wpdb->query("TRUNCATE TABLE {$table->name}");
-          //Now Insert the data from the old site for this table
-          $sql = "INSERT INTO {$table->name} (";
-          //Prepare columns
-          $col_length = count($table->columns);
-          $i = 0;
-          foreach ($table->columns as $column_key => $column) {
-              $i ++;
-              if ($i === $col_length) {
-                $sql = $sql . $column;
-              } else {
-                $sql = $sql . $column . ', ';
-              }
+          if (!empty($table->rows)) {
+            //First delete all data in this table
+            $wpdb->query("TRUNCATE TABLE {$table->name}");
+            //Now Insert the data from the old site for this table
+            $sql = "INSERT INTO {$table->name} (";
+            //Prepare columns
+            $col_length = count($table->columns);
+            $i = 0;
+            foreach ($table->columns as $column_key => $column) {
+                $i ++;
+                if ($i === $col_length) {
+                  $sql = $sql . $column;
+                } else {
+                  $sql = $sql . $column . ', ';
+                }
+            }
+            $sql = $sql . ') VALUES' ;
+            $row_length = count($table->rows);
+            $row_counter = 0;
+            foreach ($table->rows as $row_key => $row) {
+                $sql = $sql . '(';
+                $i = 0;
+                foreach ($table->columns as $column_key => $column) {
+                  $i ++;
+                  if ($i === $col_length) {
+                    $sql = $sql . "'" . esc_sql($row->$column) . "'" ;
+                  } else {
+                    $sql = $sql . "'" . esc_sql($row->$column) . "'" . ', ';
+                  }
+                }
+                $row_counter ++;
+                if ($row_counter === $row_length) {
+                    $sql = $sql . ')' ;
+                } else {
+                    $sql = $sql . '), ' ;
+                }
+            }
+            $wpdb->query($sql);
+            $error = $wpdb->last_error;
+            array_push($errors, $error);
           }
-          $sql = $sql . ') VALUES' ;
-          foreach ($table->rows as $row_key => $row) {
-              $i = 0;
-              $sql = $sql . '(' ;
-              foreach ($table->columns as $column_key => $column) {
-                  $sql = $sql . $row->column;
-              }
-              $sql = $sql . '),' ;
-          }
+
       }
-      return $sql;
+      return $errors;
+
   }
 
 }
