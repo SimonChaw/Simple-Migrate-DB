@@ -86,6 +86,7 @@ final class Simple_Migrate_DB {
   			self::$instance->includes();
 				self::$instance->setup_secure_key();
   			self::$instance->dbhandler = new SMDB_DB_Handler();
+				self::$instance->start_session();
   		}
 	    return self::$instance;
 	}
@@ -202,6 +203,20 @@ final class Simple_Migrate_DB {
 		//DATABASE
 		require_once SMDB_PLUGIN_DIR . 'includes/smdb-table-class.php';
     require_once SMDB_PLUGIN_DIR . 'includes/smdb-db-handler.php';
+	}
+
+	private function start_session(){
+		if (version_compare(phpversion(), '5.4.0', '<')) {
+     if(session_id() == '') {
+        session_start();
+		     }
+		 }
+		 else
+		 {
+		    if (session_status() == PHP_SESSION_NONE) {
+		        session_start();
+		    }
+		 }
 	}
 
 

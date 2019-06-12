@@ -50,17 +50,20 @@ function render_admin_view(){
           </div>
         </div>
         <div class="card-footer text-right">
-          <div class="btn btn-primary" disabled>Migrate!</div>
+          <div v-on:click="testPack" class="btn btn-primary" disabled>Migrate!</div>
         </div>
       </div>
       <div v-if="currentStage == 3">
         <div class="card-body">
+          <div class="card-title font-bold">Working on it!</div>
           <div class="card-text">
-            <div class="progress">
-              <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="w-100 text-center">
+              <?php
+                echo '<img src="' . plugins_url( 'loading.svg', __FILE__ ) . '" > ';
+                ?>
             </div>
-            <div class="text-muted">
-              Please wait while we pack up this site and it's database for migration!
+            <div class="text-muted text-center">
+              {{currentProcess.processName}}
             </div>
           </div>
         </div>
