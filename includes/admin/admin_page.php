@@ -50,7 +50,7 @@ function render_admin_view(){
           </div>
         </div>
         <div class="card-footer text-right">
-          <div v-on:click="testPack" class="btn btn-primary" disabled>Migrate!</div>
+          <div v-on:click="packfiles" class="btn btn-primary" disabled>Migrate!</div>
         </div>
       </div>
       <div v-if="currentStage == 3">
