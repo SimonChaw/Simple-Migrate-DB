@@ -92,3 +92,90 @@ function migrate_db() {
 }
 
 add_action('wp_ajax_migrate_db', 'migrate_db', 10);
+
+/**
+ * Create jobs with ids so the user can get updates.
+ *
+ * @since  1.0
+ * @return mixed
+ */
+function update_progress($id, $currentStep, $processLength) {
+
+    $_SESSION['process-' . $id] = [
+      'currentStep' => $currentStep,
+      'processLength' => $processLength,
+      'message' => 'Update',
+    ];
+}
+
+/**
+ * Return request job update by id
+ *
+ * @since  1.0
+ * @return mixed
+ */
+function get_process_update(){
+  $update = '';
+  $id = $_POST['processId'];
+  if ($id) {
+    $update = $_SESSION['process-' . $id];
+  }
+  return $update;
+}
+
+//add_filter( 'heartbeat_received', 'get_process_update', 10, 3 );
+
+
+/**
+ * Pack up this site's content into a zip folder.
+ *
+ * @since  1.0
+ * @return mixed
+ */
+function packup() {
+  // Keep track of the process id so the client can get their updates.
+  $id = $_POST['id'];
+
+  $package = new ZipArchive();
+
+  $destination = get_home_path();
+  $result;
+
+  if (!$package->open('package.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE)){
+    $result = "Failed to create archive";
+  }
+
+  if(!isset($result)){
+    $result="ok so far.";
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($destination));
+    $fileCount = iterator_count($files);
+    $i = 0;
+    foreach ($files as $name => $file)
+    {
+    	if ($file->isDir()) {
+    		flush();
+    		continue;
+    	}
+
+      update_progress($id, $i, $fileCount);
+
+    	$filePath = $file->getRealPath();
+      $relativePath = substr($filePath, strlen($destination));
+
+      $package->addFile($filePath, $relativePath);
+      $i ++;
+    }
+
+
+    // Zip archive will be created only after closing object
+    $package->close();
+  }
+  // All we want to do here is just let the client know we received the request.
+  if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+    header( 'Content-Type: application/json' );
+    echo json_encode( ['success' => true] );
+    wp_die();
+  }
+}
+
+add_action('wp_ajax_pack', 'packup', 10);
