@@ -51,7 +51,7 @@ jQuery(document).ready(function ($) {
       secure_key: '0asdas823102131', // Need to get this loading in some other way
     },
     methods: {
-      testPack : function() {
+      packfiles : function() {
         let id = generateID(6);
         lastID = id;
         this.currentStage = 3;
@@ -65,11 +65,28 @@ jQuery(document).ready(function ($) {
         me = this;
         $.post(ajaxurl, postData, function(response){
             if (response.success === true) {
-              me.currentProcess.processName = "Preparing your SQL..."
+              me.packsql();
             }
         }, 'json');
 
     },
+    packsql : function() {
+      // use me from now on. Scope has been lost
+      me.currentProcess.processName = "Preparing your SQL..."
+      let id = generateID(6);
+      lastID = id;
+
+      var postData = {
+          action : 'packsql',
+          id : id,
+      };
+
+      $.post(ajaxurl, postData, function(response){
+          if (response.success === true) {
+            me.currentStage = 4;
+          }
+      }, 'json');
+    }
   }
   });
 

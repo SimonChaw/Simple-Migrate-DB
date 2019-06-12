@@ -86,6 +86,7 @@ final class Simple_Migrate_DB {
   			self::$instance->includes();
 				self::$instance->setup_secure_key();
   			self::$instance->dbhandler = new SMDB_DB_Handler();
+				self::$instance->dbpacker = new SMDB_DB_Packer();
 				self::$instance->start_session();
   		}
 	    return self::$instance;
@@ -203,6 +204,7 @@ final class Simple_Migrate_DB {
 		//DATABASE
 		require_once SMDB_PLUGIN_DIR . 'includes/smdb-table-class.php';
     require_once SMDB_PLUGIN_DIR . 'includes/smdb-db-handler.php';
+		require_once SMDB_PLUGIN_DIR . 'includes/smdb-db-packer.php';
 	}
 
 	private function start_session(){

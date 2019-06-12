@@ -179,3 +179,24 @@ function packup() {
 }
 
 add_action('wp_ajax_pack', 'packup', 10);
+
+
+/**
+ * Pack up this site's SQL into a file for export.
+ *
+ * @since  1.0
+ * @return bool
+ */
+function packsql(){
+
+  // Call our db packer class
+  SMDB()->dbpacker->packup();
+
+  if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+    header( 'Content-Type: application/json' );
+    echo json_encode( ['success' => true] );
+    wp_die();
+  }
+}
+
+add_action('wp_ajax_packsql', 'packsql', 10);
