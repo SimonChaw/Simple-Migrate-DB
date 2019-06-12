@@ -26,7 +26,7 @@ function render_admin_view(){
           </div>
         </div>
         <div class="card-footer text-center">
-          <div class="btn btn-primary">Migrate this site.</div>
+          <div v-on:click="changeStage" class="btn btn-primary">Migrate this site.</div>
         </div>
       </div>
       <div v-if="currentStage == 2">
@@ -42,9 +42,18 @@ function render_admin_view(){
                 <label for="url">Enter the URL of the site you are migrating to:</label>
                 <input id="url" type="text" class="form-control" name="" value="" placeholder="Ex: http://www.newsite.com">
               </div>
-              <div>
+              <div class="mb-2">
                 <label for="securekey">Enter the SMDB Secure Key of the site you are migrating to:</label>
                 <input id="securekey" type="text" class="form-control" name="" value="" placeholder="Enter the 16 digit secure key">
+              </div>
+              <div class="mb-2">
+                <label for="username">Enter your FTP Username:</label>
+                <input id="username" type="text" class="form-control" name="" value="" placeholder="Username">
+              </div>
+              <div>
+                <label for="password">Enter your FTP Password:</label>
+                <input id="password" type="password" class="form-control" name="" value="" placeholder="Password">
+                <p class="text-muted">Your FTP Username & Password will not be saved anywhere. It will be used to send your files over and that's all.</p>
               </div>
             </div>
           </div>
@@ -73,7 +82,8 @@ function render_admin_view(){
           <div class="card-title font-bold">Good News!</div>
           <div class="card-text">
             <div class="alert alert-success">
-              Your site has been successfully migrated! Congrats!
+              Your site has been packed up and sent on its way to your new server! <br />
+              Please use your SMDB plugin on that site to finish the migration.
             </div>
           </div>
         </div>

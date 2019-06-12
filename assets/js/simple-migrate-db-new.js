@@ -40,7 +40,7 @@ jQuery(document).ready(function ($) {
     el: '#app',
     data: {
       heartBeatInterval : 1000,
-      currentStage: 2,
+      currentStage: 1,
       currentProcess : {
         processLength : 0,
         currentStep : -1,
@@ -51,6 +51,9 @@ jQuery(document).ready(function ($) {
       secure_key: '0asdas823102131', // Need to get this loading in some other way
     },
     methods: {
+      changeStage : function() {
+        this.currentStage ++;
+      },
       packfiles : function() {
         let id = generateID(6);
         lastID = id;
