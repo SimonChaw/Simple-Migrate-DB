@@ -58,6 +58,16 @@ final class Simple_Migrate_DB {
 	 */
 	public $session;
 
+	/**
+	 * SMDB secure key.
+	 *
+	 * For authenticating external interactions
+	 *
+	 * @var object|SMDB_Secure_key
+	 * @since 1.5
+	 */
+	public $securekey;
+
   /**
 	 * Main Simple_Migrate_DB Instance.
 	 *
@@ -75,7 +85,8 @@ final class Simple_Migrate_DB {
   			self::$instance = new Simple_Migrate_DB;
   			self::$instance->setup_constants();
   			self::$instance->includes();
-  			self::$instance->dbhandler     = new SMDB_DB_Handler();
+				self::$instance->setup_secure_key();
+  			self::$instance->dbhandler = new SMDB_DB_Handler();
   		}
 	    return self::$instance;
 	}
@@ -103,6 +114,66 @@ final class Simple_Migrate_DB {
 		// Plugin Root File.
 		if ( ! defined( 'SMDB_PLUGIN_FILE' ) ) {
 			define( 'SMDB_PLUGIN_FILE', __FILE__ );
+		}
+
+		// Meta Data Keys
+		if ( ! defined( 'SMDB_METAKEY_SECURE_KEY' )) {
+			define( 'SMDB_METAKEY_SECURE_KEY', 'SMDB_SECURE_KEY' );
+		}
+	}
+
+	/**
+	 * Generate secure key for allowing access between WP sites
+	 *
+	 * @access private
+	 * @since 1.0
+	 * @return void
+	 */
+	private function setup_secure_key() {
+
+		// Check if secure key already exists.
+		$id = $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_title = 'SMDB' AND post_type = 'SMDB'" );
+
+		if (! $id ) {
+			// No post found, we have to setup.
+
+			// Create post.
+			$post_id = self::$instance->create_smdb_db_entry();
+
+			// Generate secure key.
+			self::$instance->securekey = bin2hex(random_bytes(16));
+
+			// Store secure key
+			add_post_meta($post_id, SMDB_META_SECURE_KEY, self::$instance->securekey, true);
+
+		} else {
+
+			// Secure key has already been setup. Let's get it.
+			self::$instance->securekey = get_post_meta($post_id, SMDB_METAKEY_SECURE_KEY, 'SMDB_SECURE_KEY', )
+		}
+	}
+
+	/**
+	 * Setup function, used to make an entry so we have a post ID
+	 * to associate with all our meta data
+	 *
+	 * @access private
+	 * @since 1.0
+	 * @return mixed
+	 */
+	private function create_smdb_db_entry() {
+		$postarr = [
+			'post_title' => 'SMDB',
+			'post_type' => 'SMDB'
+		];
+
+		$post_id = wp_insert_post($postarr);
+
+		if ($post_id != 0) {
+			// Post successfully created.
+			return $post_id;
+		} else {
+			return false;
 		}
 	}
 
