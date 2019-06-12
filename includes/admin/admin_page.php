@@ -12,46 +12,71 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 function render_admin_view(){
   ?>
-  <div class="wrap">
+  <div id="app" class="wrap">
     <h1>Simple Database Migration</h1>
     <br>
     <hr class="wp-header-end">
-    <div class="" style="width:60%; height:auto; background-color:white;border: 2px solid #ccc;padding:20px;">
-      <div id="smdb-1" style="width:auto;">
-        <h3>First what's the url of your old site?</h3>
-        <input id="txt-site" style="width:60%;" type="text" placeholder="http://www.newwordpress.com" value="">
-        <a href="#" id="btn-request" class="button button-primary" style="float:right;">Request</a>
-        <div id="smdb-1-warnings"></div>
-      </div>
-      <div id="smdb-2" style="display:none;">
-        <div id="selection" style="display:none;">
-          <h4>Excellent! Here are the tables that are currently on your old site. Select which ones you want moved to your new site!</h4>
-          <table class="wp-list-table widefat fixed striped pages">
-            <thead>
-              <tr>
-                <td id="cb" class="manage-column column-cb check-column"><label class="screen-reader-text" for="cb-select-all-1">Select All</label><input id="cb-select-all" type="checkbox"></td>
-                <th>Table Names</th>
-              </tr>
-            </thead>
-            <tbody id="tbl-list">
-
-            </tbody>
-            <tfoot>
-                <tr>
-                  <td></td>
-                  <td><a href="#" id="btn-finish-tables" class="button button-primary" style="float:right">Confirm Selection</a></div></td>
-                </tr>
-            </tfoot>
-          </table>
+    <div class="">Your SMDB Key : {{secure_key}}</div>
+    <div class="card"  style="padding:0;">
+      <div v-if="currentStage == 1">
+        <div class="card-body">
+          <div class="card-title">Current Migrations:</div>
+          <div class="card-text text-center ">
+            No pending migration requests.
+          </div>
         </div>
-      <div id="smdb-3" class="" style="display:none;">
-        <div style="background-color:#ccc;border:2px solid white;width:60%; margin: 20px auto 0 auto; padding: 5px 10px;">
-          <h4 style="margin-top:0;">Progress...</h4>
-          <div class="spinner"></div>
-          <div style="clear:both;"></div>
+        <div class="card-footer text-center">
+          <div class="btn btn-primary">Migrate this site.</div>
+        </div>
+      </div>
+      <div v-if="currentStage == 2">
+        <div class="card-body">
+          <div class="card-title">Site Migration:</div>
+          <div class="card-text">
+            <div class="text-muted">
+              Please note: The site you are migrating to must already have SMDB installed.
+              Upon migration the site's files and it's database will be completely wiped and replaced by this site's.
+            </div>
+            <div class="flex flex-col w-100 mt-5">
+              <div class="mb-2">
+                <label for="url">Enter the URL of the site you are migrating to:</label>
+                <input id="url" type="text" class="form-control" name="" value="" placeholder="Ex: http://www.newsite.com">
+              </div>
+              <div>
+                <label for="securekey">Enter the SMDB Secure Key of the site you are migrating to:</label>
+                <input id="securekey" type="text" class="form-control" name="" value="" placeholder="Enter the 16 digit secure key">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer text-right">
+          <div class="btn btn-primary" disabled>Migrate!</div>
+        </div>
+      </div>
+      <div v-if="currentStage == 3">
+        <div class="card-body">
+          <div class="card-text">
+            <div class="progress">
+              <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="text-muted">
+              Please wait while we pack up this site and it's database for migration!
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if="currentStage == 4">
+        <div class="card-body card-success">
+          <div class="card-title font-bold">Good News!</div>
+          <div class="card-text">
+            <div class="alert alert-success">
+              Your site has been successfully migrated! Congrats!
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
   <?php
 }
@@ -59,6 +84,12 @@ function render_admin_view(){
 function setup_menu(){
   add_menu_page( 'Migrate Database', 'Simple Database Migration', 'manage_options', 'migrate-db', 'init', 'dashicons-migrate', 1 );
 }
+
+function secure_key_in_header(){
+  echo '<script type="javascript/text">var secure_key =' . SMDB()->securekey . '</script>';
+}
+
+add_action('admin_head', 'secure_key_in_header', 1);
 
 function init(){
   render_admin_view();

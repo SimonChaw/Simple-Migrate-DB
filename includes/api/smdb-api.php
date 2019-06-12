@@ -35,7 +35,7 @@ add_action( 'rest_api_init', function () {
 function db_dump( $request ) {
     $output = array();
     $req_tables = $request->get_json_params();
-    
+
     //Set up tables and collect the data
     $db_handler = SMDB()->dbhandler;
     $db_handler->set_table_names( $req_tables );
