@@ -28,7 +28,6 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'Simple_Migrate_DB' ) ) :
-
 /**
  * Main Class.
  *
@@ -131,26 +130,33 @@ final class Simple_Migrate_DB {
 	 */
 	private function setup_secure_key() {
 
-		// Check if secure key already exists.
-		$id = $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_title = 'SMDB' AND post_type = 'SMDB'" );
+		// We should only run this check if user is logged in.
+		if ( is_admin() ) {
 
-		if (! $id ) {
-			// No post found, we have to setup.
+			// Check if secure key already exists.
+			global $wpdb;
+			$id = $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_title = 'SMDB' AND post_type = 'SMDB'" );
 
-			// Create post.
-			$post_id = self::$instance->create_smdb_db_entry();
+			if (! $id ) {
+				// No post found, we have to setup.
 
-			// Generate secure key.
-			self::$instance->securekey = bin2hex(random_bytes(16));
+				// Create post.
+				$post_id = self::$instance->create_smdb_db_entry();
+				echo $post_id;
+				// Generate secure key.
+				self::$instance->securekey = bin2hex(random_bytes(16));
 
-			// Store secure key
-			add_post_meta($post_id, SMDB_META_SECURE_KEY, self::$instance->securekey, true);
+				// Store secure key
+				add_post_meta($post_id, SMDB_METAKEY_SECURE_KEY, self::$instance->securekey, true);
 
-		} else {
+			} else {
 
-			// Secure key has already been setup. Let's get it.
-			self::$instance->securekey = get_post_meta($post_id, SMDB_METAKEY_SECURE_KEY, 'SMDB_SECURE_KEY', )
+				// Secure key has already been setup. Let's get it.
+				self::$instance->securekey = get_post_meta($id, SMDB_METAKEY_SECURE_KEY, true);
+			}
+
 		}
+
 	}
 
 	/**
@@ -164,7 +170,8 @@ final class Simple_Migrate_DB {
 	private function create_smdb_db_entry() {
 		$postarr = [
 			'post_title' => 'SMDB',
-			'post_type' => 'SMDB'
+			'post_type' => 'SMDB',
+			'post_content' => '',
 		];
 
 		$post_id = wp_insert_post($postarr);
@@ -212,4 +219,4 @@ function SMDB() {
 	return Simple_Migrate_DB::instance();
 }
 // Get SMDB Running.
-SMDB();
+add_action('init', 'SMDB');
